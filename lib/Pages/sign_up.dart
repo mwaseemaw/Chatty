@@ -1,19 +1,42 @@
 import 'package:chatty/Firebase/authentication.dart';
+import 'package:chatty/Firebase/google_sign_in.dart';
 import 'package:chatty/Pages/home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-class SignUpPage extends StatelessWidget {
+class SignUpPage extends StatefulWidget {
+  @override
+  State<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
   CollectionReference userReference = FirebaseFirestore.instance.collection('users');
+
   TextEditingController emailC = TextEditingController();
+
   TextEditingController passwordC = TextEditingController();
+  checkIfSignedIn(){
+    FirebaseAuth.instance.userChanges().listen((User? user) {
+      if(user==null){
+
+      }else{
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>HomePage()), (route) => false);
+      }
+
+    });
+  }
+  @override
+  initState(){
+    checkIfSignedIn();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
-
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -41,7 +64,7 @@ class SignUpPage extends StatelessWidget {
               ),
               TextButton(onPressed: (){
                 if(emailC.text.isNotEmpty){
-                  
+
                 }else{
                   buildShowDialog(context,'Please Enter a valid email');
                 }
@@ -80,9 +103,11 @@ class SignUpPage extends StatelessWidget {
                             Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>HomePage()), (route) => false);
                           }
                         }
-                      }, child: Text('Register',textScaleFactor: 1.2)),
+                      }, child: const Text('Register',textScaleFactor: 1.2)),
                   GestureDetector(
-                    onTap: (){},
+                    onTap: ()async{
+                      var result = await GoogleSignInAuthClass().gSignIn();
+                    },
                     child: Image.asset('Assets/google-logo.png',height: 50,width: 50,),
                   )
                 ],

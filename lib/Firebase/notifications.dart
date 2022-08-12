@@ -33,7 +33,7 @@ class NotificationsClass{
 
   }
 
-  createNotificationNow(int id,String body){
+  createNotificationNow(int id, String? title,String body){
     var androidDetails = const AndroidNotificationDetails(
         'channel Id 8',
         'Local Notification',
@@ -45,7 +45,7 @@ class NotificationsClass{
         priority: Priority.max,
         importance: Importance.high);
     var generalNotificationDetails = NotificationDetails(android: androidDetails);
-    flutterLocalNotificationsPlugin.show(id, FirebaseAuth.instance.currentUser!.email, body, generalNotificationDetails);
+    flutterLocalNotificationsPlugin.show(id,title, body, generalNotificationDetails);
 
   }
   cancelAlarm(int number)async{

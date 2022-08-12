@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
   initState(){
     FirebaseMessaging.onBackgroundMessage(_messageHandler);
     FirebaseMessaging.onMessage.listen((RemoteMessage event) {
-      NotificationsClass().createNotificationNow(1, event.notification!.body.toString(), DateTime.now());
+      NotificationsClass().createNotificationNow(1, FirebaseAuth.instance.currentUser!.email,event.notification!.body.toString());
     //  print("message received ${event.notification!.body}");
     });
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
