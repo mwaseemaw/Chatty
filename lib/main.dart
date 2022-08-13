@@ -1,6 +1,5 @@
 
 import 'package:chatty/Pages/sign_up.dart';
-import 'package:chatty/loginPage.dart';
 import 'package:http/http.dart' as http;
 import 'package:chatty/Firebase/chatScreen.dart';
 import 'package:chatty/Firebase/notifications.dart';
