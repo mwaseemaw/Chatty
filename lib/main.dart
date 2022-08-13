@@ -1,4 +1,5 @@
 
+import 'package:chatty/Pages/sign_in.dart';
 import 'package:chatty/Pages/sign_up.dart';
 import 'package:http/http.dart' as http;
 import 'package:chatty/Firebase/chatScreen.dart';
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      home: SignUpPage(),
+      home: SignInPage(),
     );
   }
 }

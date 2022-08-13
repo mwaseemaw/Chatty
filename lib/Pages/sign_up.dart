@@ -1,7 +1,5 @@
 import 'dart:ui';
-
 import 'package:chatty/Firebase/authentication.dart';
-import 'package:chatty/Firebase/google_sign_in.dart';
 import 'package:chatty/Pages/home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,21 +15,6 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController emailC = TextEditingController();
   TextEditingController passwordC = TextEditingController();
   TextEditingController nameC = TextEditingController();
-  checkIfSignedIn(){
-    FirebaseAuth.instance.userChanges().listen((User? user) {
-      if(user==null){
-
-      }else{
-        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>HomePage()), (route) => false);
-      }
-
-    });
-  }
-  @override
-  initState(){
-    checkIfSignedIn();
-    super.initState();
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,22 +25,13 @@ class _SignUpPageState extends State<SignUpPage> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'Superscript',
-                style: TextStyle(
-                  fontFeatures: [
-                    FontFeature.enable('sups'),
-                  ],
-                ),
-              ),
-              Text('data', style: TextStyle(color: Colors.black,fontFeatures: [FontFeature.randomize()])),
-              RichText(
+            RichText(
                 text:const TextSpan(
                   children: [
                     TextSpan(text: 'Re',style: TextStyle(fontSize: 40,fontStyle: FontStyle.italic,fontWeight: FontWeight.bold, color: Colors.indigoAccent)),
-                    TextSpan(text: 'gister',style: TextStyle(fontSize: 35,fontFeatures: [FontFeature.enable('sups'),FontFeature.superscripts()]))
+                    TextSpan(text: 'gister',style: TextStyle(fontSize: 35))
                   ],
-                  style: TextStyle(color: Colors.black,fontFeatures: [FontFeature.superscripts()])
+                  style: TextStyle(color: Colors.black,fontFeatures: [FontFeature.enable('sups'),FontFeature.superscripts()])
               ), ),
               SizedBox(
                 height: 60,
@@ -89,28 +63,8 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
               ),
-              ButtonBar(
-                alignment: MainAxisAlignment.spaceAround,
-                children: [
-                  TextButton(
-                      onPressed: (){
-
-                  }, child: const Text('Login Page',textScaleFactor: 1.1)),
-                  TextButton(onPressed: (){
-                    if(emailC.text.isNotEmpty){
-
-                    }else{
-                      buildShowDialog(context,'Please Enter a valid email');
-                    }
-                  }, child: const Text('Forgot Password?',textScaleFactor: 1.1)),
-                ],
-              ),
-              // ListTile(
-              //   tileColor: Colors.indigoAccent,
-              //   textColor: Colors.white,
-              //   title: Text('Login',textScaleFactor: 1.2,textAlign: TextAlign.center,),
-              // ),
               Container(
+                margin: EdgeInsets.symmetric(vertical: 10),
                 width: MediaQuery.of(context).size.width-80,
                 decoration: BoxDecoration(
                   color: Colors.indigoAccent,
@@ -130,9 +84,13 @@ class _SignUpPageState extends State<SignUpPage> {
                       }
                     }
                   },
-                  child: Text('REGISTER',textScaleFactor: 1.2,style: TextStyle(color: Colors.white),),
+                  child: const Text('REGISTER',textScaleFactor: 1.2,style: TextStyle(color: Colors.white),),
                 ),
               ),
+              TextButton(
+                  onPressed: (){
+                    Navigator.pop(context);
+                  }, child: const Text('Go To Login Page',textScaleFactor: 1.1)),
             ],
           ),
         ),
