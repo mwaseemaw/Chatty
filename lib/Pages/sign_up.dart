@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:chatty/Firebase/authentication.dart';
 import 'package:chatty/Pages/home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 class SignUpPage extends StatefulWidget {
@@ -13,8 +13,10 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   CollectionReference userReference = FirebaseFirestore.instance.collection('users');
   TextEditingController emailC = TextEditingController();
+  TextEditingController usernameC = TextEditingController();
   TextEditingController passwordC = TextEditingController();
   TextEditingController nameC = TextEditingController();
+  bool usernameAvailable = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,34 +39,24 @@ class _SignUpPageState extends State<SignUpPage> {
                 height: 60,
                 width: MediaQuery.of(context).size.width-80,
                 child: TextField(
-                  controller: nameC,
-                  decoration: const InputDecoration(
-                      labelText: 'Name'
+                  controller: usernameC,
+                  onChanged: (usernameValue)async{
+                    DocumentSnapshot doc = await userReference.doc(usernameC.text).get();
+                    if(doc.exists){
+                      
+                    }
+                  },
+                  decoration: InputDecoration(
+                    suffix: usernameAvailable? const Icon(Icons.gpp_good_rounded,color: Colors.green,): const Icon(Icons.cancel,color: Colors.red,),
+                      labelText: 'Username'
                   ),
                 ),
               ),
-              SizedBox(
-                height: 60,
-                width: MediaQuery.of(context).size.width-80,
-                child: TextField(
-                  controller: emailC,
-                  decoration: const InputDecoration(
-                    labelText: 'Email'
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 60,
-                width: MediaQuery.of(context).size.width-80,
-                child: TextField(
-                  controller: passwordC,
-                  decoration:const InputDecoration(
-                      labelText: 'Password'
-                  ),
-                ),
-              ),
+              BoxTextField(controller: nameC, label: 'Name'),
+              BoxTextField(controller: emailC, label: 'Email'),
+              BoxTextField(controller: passwordC, label: 'Password'),
               Container(
-                margin: EdgeInsets.symmetric(vertical: 10),
+                margin: const EdgeInsets.symmetric(vertical: 10),
                 width: MediaQuery.of(context).size.width-80,
                 decoration: BoxDecoration(
                   color: Colors.indigoAccent,
@@ -72,7 +64,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 child: TextButton(
                   onPressed: ()async{
-                    if(emailC.text.isNotEmpty && passwordC.text.isNotEmpty){
+                    if(emailC.text.isNotEmpty && passwordC.text.isNotEmpty && nameC.text.isNotEmpty && usernameC.text.isNotEmpty){
                       var result = await FirebaseAuthenticationClass().signUp(email: emailC.text, password: passwordC.text);
                       if(result == emailC.text){
                         var token = await FirebaseMessaging.instance.getToken();
@@ -97,8 +89,7 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
-
-  Future<dynamic> buildShowDialog(BuildContext context,String message) {
+    Future<dynamic> buildShowDialog(BuildContext context,String message) {
     return showDialog(context: context,
                     builder: (context){
                   return SimpleDialog(
@@ -110,3 +101,37 @@ class _SignUpPageState extends State<SignUpPage> {
                     });
   }
 }
+
+
+class BoxTextField extends StatelessWidget {
+  TextEditingController controller;
+  String label;
+  BoxTextField({
+    required this.controller,
+    required this.label
+});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 60,
+      width: MediaQuery.of(context).size.width-80,
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+            labelText: label
+        ),
+      ),
+    );
+  }
+}
+
+// class SignUpPageProvider extends ChangeNotifier{
+//   bool usernameAvailable = true;
+//
+//   updateUsername(bool value){
+//     usernameAvailable = value;
+//     notifyListeners();
+//   }
+//
+// }

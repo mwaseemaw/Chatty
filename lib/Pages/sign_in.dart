@@ -52,7 +52,7 @@ class _SignInPageState extends State<SignInPage> {
                 ), ),
               SizedBox(
                 height: 65,
-                width: MediaQuery.of(context).size.width-80,
+                width: MediaQuery.of(context).size.width-70,
                 child: TextField(
                   controller: emailC,
                   style: const TextStyle(fontSize: 17),
@@ -63,7 +63,7 @@ class _SignInPageState extends State<SignInPage> {
               ),
               SizedBox(
                 height: 65,
-                width: MediaQuery.of(context).size.width-80,
+                width: MediaQuery.of(context).size.width-70,
                 child: TextField(
                   controller: passwordC,
                   style: const TextStyle(fontSize: 17),
@@ -91,7 +91,7 @@ class _SignInPageState extends State<SignInPage> {
               ),
               Container(
                 margin: const EdgeInsets.only(top: 20,bottom: 30),
-                width: MediaQuery.of(context).size.width-80,
+                width: MediaQuery.of(context).size.width-70,
                 decoration: BoxDecoration(
                     color: Colors.indigoAccent,
                     borderRadius: BorderRadius.circular(10)
