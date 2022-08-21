@@ -19,12 +19,9 @@ class _SignInPageState extends State<SignInPage> {
   TextEditingController passwordC = TextEditingController();
   checkIfSignedIn(){
     FirebaseAuth.instance.userChanges().listen((User? user) {
-      if(user==null){
-
-      }else{
+      if(user!=null){
         Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>HomePage()), (route) => false);
       }
-
     });
   }
   @override
@@ -98,6 +95,11 @@ class _SignInPageState extends State<SignInPage> {
                 ),
                 child: TextButton(
                   onPressed: ()async{
+                    // final DateTime dateOne = DateTime(2022, 8, 30);
+                    // final DateTime dateTwo = DateTime(2022, 9, 30);
+                    // int.parse(source)
+                    // final Duration duration = dateOne.difference(dateTwo);
+                    // print(duration.inDays);
                     if(emailC.text.isNotEmpty && passwordC.text.isNotEmpty){
                       String? result = await FirebaseAuthenticationClass().signIn(email: emailC.text, password: passwordC.text);
                       if(result == emailC.text){ //Check returned email same as entered email
@@ -114,21 +116,20 @@ class _SignInPageState extends State<SignInPage> {
                   child: const Text('LOGIN',textScaleFactor: 1.2,style: TextStyle(color: Colors.white),),
                 ),
               ),
-              Container(
-                width: MediaQuery.of(context).size.width-80,
-                decoration: const BoxDecoration(
-                  boxShadow: [BoxShadow(color: Colors.black,spreadRadius: 1,blurRadius: 5)],
-                  shape: BoxShape.circle,
-                    color: Colors.white,
-                ),
-                child: TextButton(
-                  onPressed: ()async{
-                    var result = await GoogleSignInAuthClass().gSignIn();
-
-                  },
-                  child: Image.asset('Assets/google-logo.png',height: 30,width: 30,),
-                ),
-              ),
+              // Container(
+              //   width: MediaQuery.of(context).size.width-80,
+              //   decoration: const BoxDecoration(
+              //     boxShadow: [BoxShadow(color: Colors.black,spreadRadius: 1,blurRadius: 5)],
+              //     shape: BoxShape.circle,
+              //       color: Colors.white,
+              //   ),
+              //   child: TextButton(
+              //     onPressed: ()async{
+              //       var result = await GoogleSignInAuthClass().gSignIn();
+              //     },
+              //     child: Image.asset('Assets/google-logo.png',height: 30,width: 30,),
+              //   ),
+              // ),
             ],
           ),
         ),

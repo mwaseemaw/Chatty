@@ -1,8 +1,10 @@
 import 'package:chatty/Pages/sign_in.dart';
+import 'package:chatty/Pages/sign_up.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 void main() async{
@@ -17,9 +19,14 @@ void main() async{
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      home: SignInPage(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: SignUpPageProvider(),)
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        home: SignInPage(),
+      ),
     );
   }
 }

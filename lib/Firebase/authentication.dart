@@ -15,13 +15,13 @@ class FirebaseAuthenticationClass{
     
     }
 
-  signUp({required email,required password})async{
+  Future signUp({required email,required password})async{
     try {
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      return instance.currentUser!.email;
+      return userCredential.user!.email;
     } on FirebaseAuthException catch (e) {
       return e.message;
     }

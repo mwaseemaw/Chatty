@@ -1,9 +1,13 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui';
 import 'package:chatty/Firebase/authentication.dart';
 import 'package:chatty/Pages/home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 class SignUpPage extends StatefulWidget {
   @override
@@ -12,11 +16,20 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   CollectionReference userReference = FirebaseFirestore.instance.collection('users');
+  CollectionReference usernameReference = FirebaseFirestore.instance.collection('username');
+  Reference storage = FirebaseStorage.instance.ref();
   TextEditingController emailC = TextEditingController();
   TextEditingController usernameC = TextEditingController();
   TextEditingController passwordC = TextEditingController();
   TextEditingController nameC = TextEditingController();
   bool usernameAvailable = true;
+
+  usernameValidity()async{
+    DocumentSnapshot doc = await usernameReference.doc(usernameC.text).get();
+    doc.exists?
+    Provider.of<SignUpPageProvider>(context,listen: false).updateUsername(false):
+    Provider.of<SignUpPageProvider>(context,listen: false).updateUsername(true);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,22 +49,19 @@ class _SignUpPageState extends State<SignUpPage> {
                   style: TextStyle(color: Colors.black,fontFeatures: [FontFeature.enable('sups'),FontFeature.superscripts()])
               ), ),
               SizedBox(
-                height: 60,
                 width: MediaQuery.of(context).size.width-80,
                 child: TextField(
+                  textInputAction: TextInputAction.done,
                   controller: usernameC,
-                  onChanged: (usernameValue)async{
-                    DocumentSnapshot doc = await userReference.doc(usernameC.text).get();
-                    if(doc.exists){
-                      
-                    }
-                  },
                   decoration: InputDecoration(
-                    suffix: usernameAvailable? const Icon(Icons.gpp_good_rounded,color: Colors.green,): const Icon(Icons.cancel,color: Colors.red,),
+                    suffix: Provider.of<SignUpPageProvider>(context,listen: true).usernameAvailable == true ? const Icon(Icons.gpp_good_rounded,color: Colors.green,): const Icon(Icons.cancel,color: Colors.red,),
                       labelText: 'Username'
                   ),
                 ),
               ),
+              // TextButton(onPressed: ()async{
+              //   usernameValidity();
+              // }, child: const Text('Check Username available',style: TextStyle(color: Colors.indigoAccent),)),
               BoxTextField(controller: nameC, label: 'Name'),
               BoxTextField(controller: emailC, label: 'Email'),
               BoxTextField(controller: passwordC, label: 'Password'),
@@ -64,17 +74,44 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 child: TextButton(
                   onPressed: ()async{
-                    if(emailC.text.isNotEmpty && passwordC.text.isNotEmpty && nameC.text.isNotEmpty && usernameC.text.isNotEmpty){
-                      var result = await FirebaseAuthenticationClass().signUp(email: emailC.text, password: passwordC.text);
-                      if(result == emailC.text){
-                        var token = await FirebaseMessaging.instance.getToken();
-                        await userReference.doc(emailC.text).set({
-                          'email':emailC.text,
-                          'token':token
-                        });
-                        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>HomePage()), (route) => false);
+                    await usernameValidity();
+                    try{
+                      if(Provider.of<SignUpPageProvider>(context,listen: false).usernameAvailable == true){
+                        if(emailC.text.isNotEmpty && passwordC.text.isNotEmpty && nameC.text.isNotEmpty && usernameC.text.isNotEmpty){
+                          XFile? file = await ImagePicker().pickImage(source: ImageSource.gallery);
+                          if(file != null){
+                            var u = FileImage(File(file.path));
+                           // File f = File(file.path);
+                           // var result = await FirebaseAuthenticationClass().signUp(email: emailC.text, password: passwordC.text);
+                            if(emailC.text == await FirebaseAuthenticationClass().signUp(email: emailC.text, password: passwordC.text)){
+                              await storage.child(emailC.text).putFile(u.file);
+                              String url = await storage.child(emailC.text).getDownloadURL();
+                              var token = await FirebaseMessaging.instance.getToken();
+                              usernameReference.doc(usernameC.text).set({'username':usernameC.text});
+                              await userReference.doc(emailC.text).set({
+                                'username':usernameC.text,
+                                'name':nameC.text,
+                                'email':emailC.text,
+                                'token':token,
+                                'profile':url
+                              });
+                              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>HomePage()), (route) => false);
+                            }
+                          }else{
+                            buildShowDialog(context, 'Please Upload a profile picture to continue');
+                          }
+
+                        }else{
+                          buildShowDialog(context, 'Please Enter all details');
+                        }
+                      }else{
+                        buildShowDialog(context, 'Check username validity');
                       }
+                    }catch(e){
+                      buildShowDialog(context, e.toString());
                     }
+
+
                   },
                   child: const Text('REGISTER',textScaleFactor: 1.2,style: TextStyle(color: Colors.white),),
                 ),
@@ -114,7 +151,6 @@ class BoxTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 60,
       width: MediaQuery.of(context).size.width-80,
       child: TextField(
         controller: controller,
@@ -126,12 +162,11 @@ class BoxTextField extends StatelessWidget {
   }
 }
 
-// class SignUpPageProvider extends ChangeNotifier{
-//   bool usernameAvailable = true;
-//
-//   updateUsername(bool value){
-//     usernameAvailable = value;
-//     notifyListeners();
-//   }
-//
-// }
+class SignUpPageProvider extends ChangeNotifier{
+  bool usernameAvailable = true;
+  updateUsername(bool value){
+    usernameAvailable = value;
+    notifyListeners();
+  }
+
+}
