@@ -24,11 +24,20 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController nameC = TextEditingController();
   bool usernameAvailable = true;
 
-  usernameValidity()async{
-    DocumentSnapshot doc = await usernameReference.doc(usernameC.text).get();
-    doc.exists?
-    Provider.of<SignUpPageProvider>(context,listen: false).updateUsername(false):
-    Provider.of<SignUpPageProvider>(context,listen: false).updateUsername(true);
+  Future usernameValidity()async{
+      DocumentSnapshot doc = await usernameReference.doc(usernameC.text).get();
+      doc.exists?
+      Provider.of<SignUpPageProvider>(context,listen: false).updateUsername(false)
+          :
+      Provider.of<SignUpPageProvider>(context,listen: false).updateUsername(true);
+  }
+  @override
+  void dispose() {
+    emailC.dispose();
+    usernameC.dispose();
+    passwordC.dispose();
+    nameC.dispose();
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
@@ -74,8 +83,10 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 child: TextButton(
                   onPressed: ()async{
-                    await usernameValidity();
+
                     try{
+                      Provider.of<SignUpPageProvider>(context,listen: false).updateLoading(true);
+                      await usernameValidity();
                       if(Provider.of<SignUpPageProvider>(context,listen: false).usernameAvailable == true){
                         if(emailC.text.isNotEmpty && passwordC.text.isNotEmpty && nameC.text.isNotEmpty && usernameC.text.isNotEmpty){
                           XFile? file = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -95,25 +106,36 @@ class _SignUpPageState extends State<SignUpPage> {
                                 'token':token,
                                 'profile':url
                               });
+                              Provider.of<SignUpPageProvider>(context,listen: false).updateLoading(false);
                               Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>HomePage()), (route) => false);
                             }
                           }else{
+                            Provider.of<SignUpPageProvider>(context,listen: false).updateLoading(false);
                             buildShowDialog(context, 'Please Upload a profile picture to continue');
                           }
 
                         }else{
+                          Provider.of<SignUpPageProvider>(context,listen: false).updateLoading(false);
                           buildShowDialog(context, 'Please Enter all details');
                         }
                       }else{
+                        Provider.of<SignUpPageProvider>(context,listen: false).updateLoading(false);
                         buildShowDialog(context, 'Check username validity');
                       }
+                      Provider.of<SignUpPageProvider>(context,listen: false).updateLoading(false);
+                    }on FirebaseException catch(ex){
+                      Provider.of<SignUpPageProvider>(context,listen: false).updateLoading(false);
+                      buildShowDialog(context, ex.toString());
                     }catch(e){
+                      Provider.of<SignUpPageProvider>(context,listen: false).updateLoading(false);
                       buildShowDialog(context, e.toString());
                     }
-
-
                   },
-                  child: const Text('REGISTER',textScaleFactor: 1.2,style: TextStyle(color: Colors.white),),
+                  child:
+                  Provider.of<SignUpPageProvider>(context,listen: false).isLoading == true ?
+                      const CircularProgressIndicator(color: Colors.white,)
+                      :
+                      const Text('REGISTER',textScaleFactor: 1.2,style: TextStyle(color: Colors.white),),
                 ),
               ),
               TextButton(
@@ -164,8 +186,14 @@ class BoxTextField extends StatelessWidget {
 
 class SignUpPageProvider extends ChangeNotifier{
   bool usernameAvailable = true;
+  bool isLoading = false;
   updateUsername(bool value){
     usernameAvailable = value;
+    notifyListeners();
+  }
+
+  updateLoading(value){
+    isLoading = value;
     notifyListeners();
   }
 
